@@ -1,5 +1,8 @@
 const API_BASE = "http://localhost:3000/api";
 
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "./login.html";
+
 const form = document.getElementById("formPedido");
 const hint = document.getElementById("formHint");
 const tableBody = document.querySelector("#pedidosTable tbody");
@@ -11,29 +14,31 @@ const statConcluidas = document.getElementById("statConcluidas");
 
 document.getElementById("year").textContent = new Date().getFullYear();
 
-function badge(status){
+function badge(status) {
   return `<span class="badge badge--${status}">${status}</span>`;
 }
 
-function fmtDate(iso){
+function fmtDate(iso) {
   const d = new Date(iso);
   return d.toLocaleString("pt-BR");
 }
 
-async function fetchPedidos(){
+async function fetchPedidos() {
   const status = statusFilter.value;
   const url = new URL(`${API_BASE}/pedidos`);
   if (status) url.searchParams.set("status", status);
 
   const res = await fetch(url);
-  if(!res.ok) throw new Error("Falha ao carregar pedidos");
+  if (!res.ok) throw new Error("Falha ao carregar pedidos");
   return res.json();
 }
 
-async function refresh(){
+async function refresh() {
   const data = await fetchPedidos();
 
-  tableBody.innerHTML = data.items.map(p => `
+  tableBody.innerHTML = data.items
+    .map(
+      (p) => `
     <tr>
       <td>${p.id}</td>
       <td>${p.empresa}</td>
@@ -43,7 +48,9 @@ async function refresh(){
       <td>${badge(p.status)}</td>
       <td>${fmtDate(p.created_at)}</td>
     </tr>
-  `).join("");
+  `
+    )
+    .join("");
 
   statTotal.textContent = data.summary.total;
   statAbertas.textContent = data.summary.abertas;
@@ -61,11 +68,26 @@ form.addEventListener("submit", async (e) => {
   const payload = Object.fromEntries(formData.entries());
   payload.quantidade = Number(payload.quantidade);
 
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "./login.html";
+    return;
+  }
+
   const res = await fetch(`${API_BASE}/pedidos`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
   });
+
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "./login.html";
+    return;
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -78,7 +100,8 @@ form.addEventListener("submit", async (e) => {
   await refresh();
 });
 
-refresh().catch(err => {
+refresh().catch((err) => {
   console.error(err);
-  hint.textContent = "Não consegui conectar no backend. Ele está rodando em localhost:3000?";
+  hint.textContent =
+    "Não consegui conectar no backend. Ele está rodando em localhost:3000?";
 });

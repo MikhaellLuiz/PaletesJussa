@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Criar conta</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="section">
+    <div class="container" style="max-width:520px">
+      <div class="card">
+        <h2>Criar conta</h2>
+
+        <form id="registerForm" class="form">
+          <label>Nome <input name="name" required /></label>
+          <label>Email <input name="email" type="email" required /></label>
+          <label>Senha <input name="password" type="password" minlength="6" required /></label>
+          <button class="btn btn--primary" type="submit">Cadastrar</button>
+          <p class="hint" id="hint"></p>
+        </form>
+
+        <p class="muted small">Já tem conta? <a href="./login.html">Entrar</a></p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API = "http://localhost:3000/api";
+    const form = document.getElementById("registerForm");
+    const hint = document.getElementById("hint");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hint.textContent = "Criando conta...";
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+
+      const res = await fetch(`${API}/auth/register`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(()=> ({}));
+      if (!res.ok) {
+        hint.textContent = data.error || "Erro ao cadastrar.";
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      window.location.href = "./index.html";
+    });
+  </script>
+</body>
+</html>
