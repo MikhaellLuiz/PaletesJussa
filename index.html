@@ -1,4 +1,16 @@
-<h2>Agendar coleta de paletes</h2>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Agendamento de Coleta de Paletes</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Agendar Coleta de Paletes</h1>
 
 <form action="https://formsubmit.co/paletes@leitejussara.com" method="POST">
 
@@ -15,15 +27,19 @@
 <select name="tipo">
 <option value="">Tipo de palete</option>
 <option>PBR</option>
+<option>Europeu</option>
 <option>Descartável</option>
-<option>Misto</option>
 </select>
 
-<input type="date" name="data">
+<input type="date" name="data" required>
 
-<textarea name="observacao" placeholder="Observações"></textarea>
+<textarea name="observacoes" placeholder="Observações"></textarea>
 
 <button type="submit">Agendar coleta</button>
 
 </form>
 
+</div>
+
+</body>
+</html>
